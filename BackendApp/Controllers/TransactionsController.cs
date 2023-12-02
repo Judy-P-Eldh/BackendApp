@@ -1,5 +1,8 @@
-﻿using BackendApp.Core.Enteties;
+﻿using AutoMapper;
+using BackendApp.Core.DTOs;
+using BackendApp.Core.Enteties;
 using BackendApp.Data;
+using BackendApp.Data.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,110 +12,62 @@ namespace BackendApp.Controllers;
 [ApiController]
 public class TransactionsController : ControllerBase
 {
-    private readonly BackenAppContext _context;
+    private readonly BackenAppContext _db;
+    private readonly IMapper _mapper;
+    private readonly ITransactionRepository _transactionRepo;
 
-    public TransactionsController(BackenAppContext context)
+    public TransactionsController(BackenAppContext context, IMapper mapper, ITransactionRepository transactionRepo)
     {
-        _context = context;
+        _db = context;
+        _mapper = mapper;
+        _transactionRepo = transactionRepo;
     }
 
     // GET: api/Transactions
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Transaction>>> GetTransactions()
+    public async Task<ActionResult<IEnumerable<TransactionDto>>> GetTransactions()
     {
-        if (_context.Transactions == null)
-        {
-            return NotFound();
-        }
-        return await _context.Transactions.ToListAsync();
+        var transactions = await _transactionRepo.GetTransactionsAsync();
+        return Ok(_mapper.Map<IEnumerable<TransactionDto>>(transactions));
     }
 
     // GET: api/Transactions/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Transaction>> GetTransaction(Guid id)
+    [HttpGet("/transaction_id")]
+    public async Task<IActionResult> GetTransaction(string id)
     {
-        if (_context.Transactions == null)
-        {
-            return NotFound();
-        }
-        var transaction = await _context.Transactions.FindAsync(id);
+        var transaction = await _transactionRepo.GetTransactionAsync(id);
 
-        if (transaction == null)
-        {
-            return NotFound();
-        }
-
-        return transaction;
-    }
-
-    // PUT: api/Transactions/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutTransaction(Guid id, Transaction transaction)
-    {
-        if (id != transaction.Transaction_id)
-        {
-            return BadRequest();
-        }
-
-        _context.Entry(transaction).State = EntityState.Modified;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!TransactionExists(id))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
-        }
-
-        return NoContent();
+        if (transaction == null) return NotFound();
+        
+        return Ok(_mapper.Map<TransactionDto>(transaction));
     }
 
     // POST: api/Transactions
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
-    public async Task<ActionResult<Transaction>> PostTransaction(Transaction transaction)
+    public async Task<ActionResult<Transaction>> CreateTransaction([FromBody] TransactionRequestDto transactionRequest)
     {
-        if (_context.Transactions == null)
+        if (transactionRequest == null)
         {
-            return Problem("Entity set 'BackenAppContext.Transactions'  is null.");
+            return Problem("Request is null");
         }
-        _context.Transactions.Add(transaction);
-        await _context.SaveChangesAsync();
+
+        var transaction = new Transaction
+        {
+            Account_id = transactionRequest.Account_id.ToString(),
+            Amount = transactionRequest.Amount,
+            Created_at = DateTime.Now,
+            Transaction_id = Guid.NewGuid().ToString(),
+        };
+
+        _db.Transactions.Add(transaction);
+        await _db.SaveChangesAsync();
 
         return CreatedAtAction("GetTransaction", new { id = transaction.Transaction_id }, transaction);
     }
 
-    // DELETE: api/Transactions/5
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteTransaction(Guid id)
+    private bool TransactionExists(string id)
     {
-        if (_context.Transactions == null)
-        {
-            return NotFound();
-        }
-        var transaction = await _context.Transactions.FindAsync(id);
-        if (transaction == null)
-        {
-            return NotFound();
-        }
-
-        _context.Transactions.Remove(transaction);
-        await _context.SaveChangesAsync();
-
-        return NoContent();
-    }
-
-    private bool TransactionExists(Guid id)
-    {
-        return (_context.Transactions?.Any(e => e.Transaction_id == id)).GetValueOrDefault();
+        return (_db.Transactions?.Any(e => e.Transaction_id == id)).GetValueOrDefault();
     }
 }

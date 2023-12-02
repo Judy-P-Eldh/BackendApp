@@ -1,4 +1,5 @@
 using BackendApp.Data;
+using BackendApp.Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<BackenAppContext>();
 builder.Services.AddAutoMapper(typeof(MapperProfile));
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 
 
 var app = builder.Build();

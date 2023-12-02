@@ -3,6 +3,7 @@ using System;
 using BackendApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,16 +11,19 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BackendApp.Data.Migrations
 {
     [DbContext(typeof(BackenAppContext))]
-    partial class BackenAppContextModelSnapshot : ModelSnapshot
+    [Migration("20231202153800_DeletedProp")]
+    partial class DeletedProp
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.14");
 
             modelBuilder.Entity("BackendApp.Core.Enteties.Account", b =>
                 {
-                    b.Property<string>("Account_id")
+                    b.Property<Guid>("Account_id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasAnnotation("Relational:JsonPropertyName", "account_id");
 
@@ -34,12 +38,12 @@ namespace BackendApp.Data.Migrations
 
             modelBuilder.Entity("BackendApp.Core.Enteties.Transaction", b =>
                 {
-                    b.Property<string>("Transaction_id")
+                    b.Property<Guid>("Transaction_id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasAnnotation("Relational:JsonPropertyName", "transaction_id");
 
-                    b.Property<string>("Account_id")
-                        .IsRequired()
+                    b.Property<Guid>("Account_id")
                         .HasColumnType("TEXT")
                         .HasAnnotation("Relational:JsonPropertyName", "account_id");
 
@@ -62,8 +66,7 @@ namespace BackendApp.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Account_id")
-                        .IsRequired()
+                    b.Property<Guid>("Account_id")
                         .HasColumnType("TEXT")
                         .HasAnnotation("Relational:JsonPropertyName", "account_id");
 
@@ -71,8 +74,7 @@ namespace BackendApp.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasAnnotation("Relational:JsonPropertyName", "amount");
 
-                    b.Property<string>("Transaction_id")
-                        .IsRequired()
+                    b.Property<Guid>("Transaction_id")
                         .HasColumnType("TEXT")
                         .HasAnnotation("Relational:JsonPropertyName", "transaction_id");
 

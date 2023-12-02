@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using BackendApp.Core.DTOs;
 using BackendApp.Core.Enteties;
 using BackendApp.Data;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BackendApp.Controllers;
 
@@ -14,33 +10,33 @@ namespace BackendApp.Controllers;
 [ApiController]
 public class AccountsController : ControllerBase
 {
-    private readonly BackenAppContext _context;
+    private readonly BackenAppContext _db;
 
-    public AccountsController(BackenAppContext context)
+    public AccountsController(BackenAppContext db)
     {
-        _context = context;
+        _db = db;
     }
 
     // GET: api/Accounts
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
     {
-      if (_context.Accounts == null)
-      {
-          return NotFound();
-      }
-        return await _context.Accounts.ToListAsync();
+        if (_db.Accounts == null)
+        {
+            return NotFound();
+        }
+        return await _db.Accounts.ToListAsync();
     }
 
     // GET: api/Accounts/5
     [HttpGet("{id}")]
     public async Task<ActionResult<Account>> GetAccount(Guid id)
     {
-      if (_context.Accounts == null)
-      {
-          return NotFound();
-      }
-        var account = await _context.Accounts.FindAsync(id);
+        if (_db.Accounts == null)
+        {
+            return NotFound();
+        }
+        var account = await _db.Accounts.FindAsync(id);
 
         if (account == null)
         {
@@ -50,74 +46,51 @@ public class AccountsController : ControllerBase
         return account;
     }
 
-    // PUT: api/Accounts/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutAccount(Guid id, Account account)
-    {
-        if (id != account.Account_id)
-        {
-            return BadRequest();
-        }
-
-        _context.Entry(account).State = EntityState.Modified;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!AccountExists(id))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
-        }
-
-        return NoContent();
-    }
-
+    //Method only for adding dummy data to db
     // POST: api/Accounts
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
-    public async Task<ActionResult<Account>> PostAccount(Account account)
+    public async Task<ActionResult<Account>> PostAccount(AccountDto account)
     {
-      if (_context.Accounts == null)
-      {
-          return Problem("Entity set 'BackenAppContext.Accounts'  is null.");
-      }
-        _context.Accounts.Add(account);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction("GetAccount", new { id = account.Account_id }, account);
-    }
-
-    // DELETE: api/Accounts/5
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteAccount(Guid id)
-    {
-        if (_context.Accounts == null)
+        if (_db.Accounts == null)
         {
-            return NotFound();
-        }
-        var account = await _context.Accounts.FindAsync(id);
-        if (account == null)
-        {
-            return NotFound();
+            return Problem("Entity set 'BackenAppContext.Accounts'  is null.");
         }
 
-        _context.Accounts.Remove(account);
-        await _context.SaveChangesAsync();
+        var createdAccount = new Account()
+        {
+            Account_id = Guid.NewGuid().ToString(),
+            Balance = account.Balance,
+        };
 
-        return NoContent();
+        _db.Accounts.Add(createdAccount);
+        await _db.SaveChangesAsync();
+
+        return CreatedAtAction("GetAccount", new { id = createdAccount.Account_id }, account);
     }
 
-    private bool AccountExists(Guid id)
+    //// DELETE: api/Accounts/5
+    //[HttpDelete("{id}")]
+    //public async Task<IActionResult> DeleteAccount(Guid id)
+    //{
+    //    if (_db.Accounts == null)
+    //    {
+    //        return NotFound();
+    //    }
+    //    var account = await _db.Accounts.FindAsync(id);
+    //    if (account == null)
+    //    {
+    //        return NotFound();
+    //    }
+
+    //    _db.Accounts.Remove(account);
+    //    await _db.SaveChangesAsync();
+
+    //    return NoContent();
+    //}
+
+    private bool AccountExists(string id)
     {
-        return (_context.Accounts?.Any(e => e.Account_id == id)).GetValueOrDefault();
+        return (_db.Accounts?.Any(e => e.Account_id == id)).GetValueOrDefault();
     }
 }

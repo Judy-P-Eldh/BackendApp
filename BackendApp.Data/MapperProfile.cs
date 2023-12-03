@@ -11,7 +11,5 @@ public class MapperProfile : Profile
         CreateMap<Account, AccountDto>().ReverseMap();
         CreateMap<Transaction, TransactionDto>().ReverseMap();
         CreateMap<TransactionRequest, TransactionRequestDto>().ReverseMap();
-        CreateMap<Transaction, ListOfTransactionsDto>().ReverseMap();
-        CreateMap<Account, ListOfTransactionsDto>().ReverseMap();
     }
 }

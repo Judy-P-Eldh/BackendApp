@@ -50,7 +50,7 @@ public class TransactionsController : ControllerBase
     {
         if (transactionRequest == null)
         {
-            return Problem("Request is null");
+            return BadRequest("Request is null");
         }
 
         var request = _mapper.Map<TransactionRequest>(transactionRequest);

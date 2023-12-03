@@ -12,23 +12,36 @@ namespace BackendApp.Data.Repositories
             _db = db;
         }
 
-        //public async Task CreateAsync(TransactionRequest transactionRequest)
-        //{
-        //    if (FindMadeTransactions(transactionRequest))
-        //    {
-        //        throw new Exception("Transaction already exists");
-        //    }
-        //    var transaction = new Transaction
-        //    {
-        //        Account_id = transactionRequest.Account_id,
-        //        Amount = transactionRequest.Amount,
-        //        Created_at = DateTime.UtcNow,
-        //        Transaction_id = transactionRequest.Transaction_id,
-        //    };
+        public async Task<Transaction> CreateAsync(TransactionRequest transactionRequest)
+        {
+            transactionRequest = new TransactionRequest
+            {
+                Transaction_id = Guid.NewGuid().ToString(),
+                Account_id = transactionRequest.Account_id,
+                Amount = transactionRequest.Amount,
+                Request_id = Guid.NewGuid(),
+            };
 
-        //    await _db.Transactions.AddAsync(transaction);
-        //    await SaveChangesAsync();
-        //}
+            if (await RequestExistsAsync(transactionRequest.Request_id.ToString()))
+            {
+                throw new Exception("TreansactionRequest already exists");
+            }
+
+            if (await TransactionExistsAsync(transactionRequest.Transaction_id))
+            {
+                throw new Exception("Treansaction already exists");
+            }
+
+            var transaction = new Transaction
+            {
+                Account_id = transactionRequest.Account_id.ToString(),
+                Amount = transactionRequest.Amount,
+                Created_at = DateTime.Now,
+                Transaction_id = transactionRequest.Transaction_id,
+            };
+
+            return transaction;
+        }
 
         public async Task<List<Transaction>> GetTransactionsAsync()
         {
@@ -39,17 +52,15 @@ namespace BackendApp.Data.Repositories
         {
             return await _db.Transactions.FindAsync(id);
         }
-        public bool FindMadeTransactions(TransactionRequest transactionRequest)
+
+        public async Task<bool> TransactionExistsAsync(string transaction_id)
         {
-            var madeTransaction = _db.Transactions
-                .OrderBy(t => t.Transaction_id)
-                .Where(t => t.Transaction_id == transactionRequest.Transaction_id);
-            if (madeTransaction == null) return false;
-            return true;
+            return await _db.Transactions.AnyAsync(t => t.Transaction_id == transaction_id);
         }
-        public async Task<bool> SaveChangesAsync()
+
+        public async Task<bool> RequestExistsAsync(string request_id)
         {
-            return await _db.SaveChangesAsync() >= 1;
+            return await _db.TransactionRequests.AnyAsync(r => r.Request_id.ToString() == request_id);
         }
     }
 }

@@ -4,7 +4,6 @@ using BackendApp.Core.Enteties;
 using BackendApp.Data;
 using BackendApp.Data.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace BackendApp.Controllers;
 
@@ -31,7 +30,7 @@ public class TransactionsController : ControllerBase
     {
         var transactions = await _transactionRepo.GetTransactionsAsync();
         return Ok(_mapper.Map<IEnumerable<TransactionDto>>(transactions));
-    }                                                                                   
+    }
 
     // GET: api/Transactions/5
     [HttpGet("{id}")]
@@ -40,7 +39,7 @@ public class TransactionsController : ControllerBase
         var transaction = await _transactionRepo.GetTransactionAsync(id);
 
         if (transaction == null) return NotFound();
-        
+
         return Ok(_mapper.Map<TransactionDto>(transaction));
     }
 
@@ -54,18 +53,12 @@ public class TransactionsController : ControllerBase
             return Problem("Request is null");
         }
 
-        var transaction = new Transaction
-        {
-            Account_id = transactionRequest.Account_id.ToString(),
-            Amount = transactionRequest.Amount,
-            Created_at = DateTime.Now,
-            Transaction_id = Guid.NewGuid().ToString(),
-        };
+        var request = _mapper.Map<TransactionRequest>(transactionRequest);
 
+        var transaction = await _transactionRepo.CreateAsync(request);
         await _accountRepo.UpdateBalance(transaction.Amount, transaction.Account_id);
 
         _db.Transactions.Add(transaction);
-        
         await _db.SaveChangesAsync();
 
         return CreatedAtAction("GetTransaction", new { id = transaction.Transaction_id }, transaction);

@@ -1,10 +1,9 @@
-﻿using AutoMapper;
-using BackendApp.Core.Enteties;
+﻿using BackendApp.Core.Enteties;
 using Microsoft.EntityFrameworkCore;
 
 namespace BackendApp.Data.Repositories;
 
-public class AccountRepository  : IAccountRepository
+public class AccountRepository : IAccountRepository
 {
     private readonly BackenAppContext _db;
 
@@ -27,8 +26,8 @@ public class AccountRepository  : IAccountRepository
     {
         var account = _db.Accounts.Find(account_id);
         if (!await AccountExistsAsync(account_id)) return 00;
-        
-        return account.Balance += amount; 
+
+        return account.Balance += amount;
     }
 
     public async Task<bool> AccountExistsAsync(string account_id)

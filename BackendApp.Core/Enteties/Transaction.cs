@@ -6,7 +6,6 @@ namespace BackendApp.Core.Enteties;
 public class Transaction
 {
     [JsonPropertyName("transaction_id")]
-    [Required]
     public string Transaction_id { get; set; } = string.Empty;
 
     [JsonPropertyName("account_id")]

@@ -37,7 +37,7 @@ namespace BackendApp.Data.Repositories
 
         public async Task<Transaction> GetTransactionAsync(string id)
         {
-            return await _db.Transactions.FindAsync(id);
+            return await _db.Transactions.FirstOrDefaultAsync(t => t.Transaction_id == id);
         }
         public bool FindMadeTransactions(TransactionRequest transactionRequest)
         {

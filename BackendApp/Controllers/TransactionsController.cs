@@ -32,10 +32,10 @@ public class TransactionsController : ControllerBase
     }
 
     // GET: api/Transactions/5
-    [HttpGet("/transaction_id")]
-    public async Task<IActionResult> GetTransaction(string id)
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetTransaction(string transaction_id)
     {
-        var transaction = await _transactionRepo.GetTransactionAsync(id);
+        var transaction = await _transactionRepo.GetTransactionAsync(transaction_id);
 
         if (transaction == null) return NotFound();
         

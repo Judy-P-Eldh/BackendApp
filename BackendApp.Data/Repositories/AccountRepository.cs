@@ -18,8 +18,21 @@ public class AccountRepository  : IAccountRepository
         return await _db.Accounts.ToListAsync();
     }
 
-    public async Task<Account> GetAccountAsync(string id)
+    public async Task<Account> GetAccountAsync(string account_id)
     {
-        return await _db.Accounts.FindAsync(id);
+        return await _db.Accounts.FindAsync(account_id);
+    }
+
+    public async Task<int> UpdateBalance(int amount, string account_id)
+    {
+        var account = _db.Accounts.Find(account_id);
+        if (!await AccountExistsAsync(account_id)) return 00;
+        
+        return account.Balance += amount; 
+    }
+
+    public async Task<bool> AccountExistsAsync(string account_id)
+    {
+        return await _db.Accounts.AnyAsync(a => a.Account_id == account_id);
     }
 }

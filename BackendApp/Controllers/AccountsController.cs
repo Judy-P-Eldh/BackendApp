@@ -20,7 +20,6 @@ public class AccountsController : ControllerBase
         _db = db;
         _mapper = mapper;
         _accounttionRepo = accounttionRepo;
-
     }
 
     // GET: api/Accounts

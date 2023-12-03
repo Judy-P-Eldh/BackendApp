@@ -11,9 +11,4 @@ public class Account
 
     [JsonPropertyName("balance")]
     public int Balance { get; set; }
-
-    public void UpdateBalance(int amount)
-    {
-        Balance += amount; // Update the balance
-    }
 }

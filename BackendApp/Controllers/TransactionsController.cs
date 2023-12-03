@@ -15,12 +15,14 @@ public class TransactionsController : ControllerBase
     private readonly BackenAppContext _db;
     private readonly IMapper _mapper;
     private readonly ITransactionRepository _transactionRepo;
+    private readonly IAccountRepository _accountRepo;
 
-    public TransactionsController(BackenAppContext context, IMapper mapper, ITransactionRepository transactionRepo)
+    public TransactionsController(BackenAppContext context, IMapper mapper, ITransactionRepository transactionRepo, IAccountRepository accountRepo)
     {
         _db = context;
         _mapper = mapper;
         _transactionRepo = transactionRepo;
+        _accountRepo = accountRepo;
     }
 
     // GET: api/Transactions
@@ -60,14 +62,12 @@ public class TransactionsController : ControllerBase
             Transaction_id = Guid.NewGuid().ToString(),
         };
 
+        await _accountRepo.UpdateBalance(transaction.Amount, transaction.Account_id);
+
         _db.Transactions.Add(transaction);
+        
         await _db.SaveChangesAsync();
 
         return CreatedAtAction("GetTransaction", new { id = transaction.Transaction_id }, transaction);
-    }
-
-    private bool TransactionExists(string id)
-    {
-        return (_db.Transactions?.Any(e => e.Transaction_id == id)).GetValueOrDefault();
     }
 }

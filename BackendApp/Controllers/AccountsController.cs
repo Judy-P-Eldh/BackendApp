@@ -1,8 +1,9 @@
-﻿using BackendApp.Core.DTOs;
+﻿using AutoMapper;
+using BackendApp.Core.DTOs;
 using BackendApp.Core.Enteties;
 using BackendApp.Data;
+using BackendApp.Data.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace BackendApp.Controllers;
 
@@ -11,39 +12,34 @@ namespace BackendApp.Controllers;
 public class AccountsController : ControllerBase
 {
     private readonly BackenAppContext _db;
+    private readonly IMapper _mapper;
+    private readonly IAccountRepository _accounttionRepo;
 
-    public AccountsController(BackenAppContext db)
+    public AccountsController(BackenAppContext db, IMapper mapper, IAccountRepository accounttionRepo)
     {
         _db = db;
+        _mapper = mapper;
+        _accounttionRepo = accounttionRepo;
+
     }
 
     // GET: api/Accounts
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
+    public async Task<ActionResult<IEnumerable<AccountDto>>> GetAccountsAsync()
     {
-        if (_db.Accounts == null)
-        {
-            return NotFound();
-        }
-        return await _db.Accounts.ToListAsync();
+        var accounts = await _accounttionRepo.GetAccountsAsync();
+        return Ok(_mapper.Map<IEnumerable<AccountDto>>(accounts));
     }
 
     // GET: api/Accounts/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<Account>> GetAccount(Guid id)
+    public async Task<ActionResult<AccountDto>> GetAccount(string id)
     {
-        if (_db.Accounts == null)
-        {
-            return NotFound();
-        }
-        var account = await _db.Accounts.FindAsync(id);
+        var account = await _accounttionRepo.GetAccountAsync(id);
 
-        if (account == null)
-        {
-            return NotFound();
-        }
+        if (account == null) return NotFound();
 
-        return account;
+        return Ok(_mapper.Map<AccountDto>(account));
     }
 
     //Method only for adding dummy data to db
@@ -67,30 +63,5 @@ public class AccountsController : ControllerBase
         await _db.SaveChangesAsync();
 
         return CreatedAtAction("GetAccount", new { id = createdAccount.Account_id }, account);
-    }
-
-    //// DELETE: api/Accounts/5
-    //[HttpDelete("{id}")]
-    //public async Task<IActionResult> DeleteAccount(Guid id)
-    //{
-    //    if (_db.Accounts == null)
-    //    {
-    //        return NotFound();
-    //    }
-    //    var account = await _db.Accounts.FindAsync(id);
-    //    if (account == null)
-    //    {
-    //        return NotFound();
-    //    }
-
-    //    _db.Accounts.Remove(account);
-    //    await _db.SaveChangesAsync();
-
-    //    return NoContent();
-    //}
-
-    private bool AccountExists(string id)
-    {
-        return (_db.Accounts?.Any(e => e.Account_id == id)).GetValueOrDefault();
     }
 }

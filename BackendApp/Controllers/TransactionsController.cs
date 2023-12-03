@@ -25,17 +25,17 @@ public class TransactionsController : ControllerBase
 
     // GET: api/Transactions
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<TransactionDto>>> GetTransactions()
+    public async Task<ActionResult<IEnumerable<TransactionDto>>> GetTransactionsAsync()
     {
         var transactions = await _transactionRepo.GetTransactionsAsync();
         return Ok(_mapper.Map<IEnumerable<TransactionDto>>(transactions));
-    }
+    }                                                                                   
 
     // GET: api/Transactions/5
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetTransaction(string transaction_id)
+    public async Task<ActionResult> GetTransaction(string id)
     {
-        var transaction = await _transactionRepo.GetTransactionAsync(transaction_id);
+        var transaction = await _transactionRepo.GetTransactionAsync(id);
 
         if (transaction == null) return NotFound();
         
